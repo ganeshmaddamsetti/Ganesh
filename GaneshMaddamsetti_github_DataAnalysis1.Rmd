@@ -1,0 +1,234 @@
+---
+title: "Ganesh Maddamsetti"
+author: "Ganesh Maddamsetti"
+date: "10/03/2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#******* Cover Page ********
+# Video/Computer Games Dataset 
+# Analysis Report
+# Prepared by Ganesh Maddamsetti 
+# on : March 10th,2023
+
+#### **Executive Summary**
+This report presents a dataset which is chosen for the Midterm 
+in the course. First, meaning of each column is explained and then  
+Exploratory Data Analysis (EDA) is completed to understand the data. Next,  
+we determine the target and predictor variables and propose a prediction method suitable  
+for the target and predictor variables.The Dataset Givenshows the sales data of Video Games by ranking in different regions like North America NA, European Union,Japan,Other places and it'scritic scores. 
+
+### 1. INTRODUCTION
+
+
+#A) Data
+"This dataset provides up-to-date information on the sales performance and popularity of various video games worldwide. The data includes the name, platform, year of release, genre, publisher, and sales in North America,Europe, Japan, and other regions. It also features scores and ratings from both critics and users, including average critic score, number of critics reviewed, average user score, number of users reviewed, developer, and rating.This comprehensive and essential dataset offers valuable insights into the global video game market and is a must-have tool for gamers, industry professionals, and market researchers."
+```{r}
+d = read.csv("/Users/ganeshmaddamsetti/Downloads/VideoGames2.csv")
+```
+
+
+
+#B) Metadata
+
+In Video_Games dataset, there are 16717 rows and 16 columns. The name, type and size of the columns of this dataset are listed in Table-1 below.   
+
+Table-1: Metada showing column names, types and sizes.
+```{r}
+str(d)
+```
+
+# 2. EXPLORATORY DATA ANALYSIS
+
+
+# c) Provide summary() for numeric columns. Comment on the summary tables
+
+```{r}
+summary(d)
+```
+
+We find that by the summary, we can identify datatypes of each column and their lengths along with missing values in each column if any.
+
+# d) Provide table() for each character column. Which ones can be considered categorical (i.e. factor) variables?
+
+As seen in Table-1, there are numeric and character variables. It seems all character  
+variables except "Name" are actually supposed to be "factor" type, not "character". So, it is a good idea to convert "chr"  
+variables to factor type at this point. Table-2 shows the dataset after this conversion, which is    
+renamed as Data.  
+
+
+
+Table2: Metada after factor conversion.
+```{r dataconvert, echo= FALSE}
+
+Data <- lapply(d[ , c("Platform","Genre","Publisher")] , as.factor )
+Data <- cbind(Data, d[,c(1,3,6:16)])    # merge the converted columns with original numeric columns
+str(Data)
+
+```
+
+#e) How bad is the missing values situation? To answer this question, calculate number of missing values as a percentage relative to the entire dataset.
+
+Total percentage of missing values in the dataset: 18.34622 % which is considered high and can potentially impact the quality and reliability of any analysis or modeling performed on the data.
+
+When there are missing values in a dataset, there are several strategies that can be used to handle them. Some common approaches include: Complete case analysis,Imputation,Analysis-specific methods.
+As for the title of the chart reflecting this point, one possible option could be "High Percentage of Missing Values in Dataset: Implications and Strategies for Handling Missing Data".
+
+```{r}
+
+missing_pct <- colMeans(is.na(d)) * 100
+
+total_missing_pct <- sum(missing_pct) / ncol(d)
+
+cat("Percentage of missing values in each column:\n")
+print(missing_pct)
+cat("Total percentage of missing values in the dataset:", total_missing_pct, "%\n")
+
+```
+
+# 3. THE BUSINESS QUESTION
+
+Now assume that the business question is the prediction of North American Sales, and
+therefore your target variable is NA_Sales.
+
+ Answer the following questions in your report.
+
+#f) Can we use EU_Sales to predict NA_Sales? To answer this question, create a scatter plot. If you see crowdedness, Apply log transformation on both axis to clarify the plot. What title would you put in your chart reflecting the main point? 
+
+
+
+```{r}
+plot(d$EU_Sales, d$NA_Sales)
+```
+We see crowdedness.A suitable title for this chart reflecting the main point could be "Relationship between EU Sales and NA Sales".
+
+```{r}
+library(ggplot2)
+
+ggplot(df, aes(x = log(EU_Sales + 1), y = log(NA_Sales + 1))) +
+  geom_point() +
+  labs(title = "Relationship between EU Sales and NA Sales (log-transformed)",
+       x = "EU Sales (log-transformed)",
+       y = "NA Sales (log-transformed)")
+```
+
+#g) Since there are outliers in the NA sales data, filter the dataset "d" to discard any sales values greater than 7 and assign the resulting data to a new dataframe called "df". 
+
+```{r}
+
+df <- subset(d, NA_Sales <= 7)
+df
+```
+#Now create a boxplot between NA_Sales and Rating using df dataframe.Also, copy and paste the following video game content ratings in your document.What title would you put in your chart reflecting the main point? 
+
+
+```{r}
+library(ggplot2)
+
+ggplot(df, aes(x = Rating, y = NA_Sales)) +
+  geom_boxplot() +
+  labs(x = "Rating", y = "NA Sales")
+```
+
+Title would give as " Age Restriction"
+
+# E: Everyone. Content is generally suitable for all ages. ...
+# E10: Everyone 10+ Content is generally suitable for ages 10 and up. ...
+# EC: Early Childhood for ages 3+
+# T: Teen. Content is generally suitable for ages 13 and up. ...
+# M: Mature 17+ Content is generally suitable for ages 17 and up. ...
+# AO: Adults Only 18+ ...
+# RP: Rating Pending. ...
+# K-A: (Kids to Adults) rating category changed to E (Everyone)
+
+#h) Based on the meaning of each category in the previous question,how would you re-organize this chart? For example, which categories would you discard, and what categories you like to combine? How would you re-label these new categories instead of the original category names to increase readability and understanding? NOTE: This is a discussion question, do not create any chart.
+
+Re-organizing the chart based on the meaning of each category can improve its readability and understanding. Here are some suggestions:
+
+Combine the "E" and "E10+" categories, since they both represent games suitable for children and families. We can label this new category as "Everyone".Keep the "T" category as is, since it represents games suitable for teenagers.Combine the "M" and "AO" categories, since they both represent games with mature content that are not suitable for minors. We can label this new category as "Mature".Discard any other categories that are not relevant or do not have enough data.By re-organizing the categories in this way, we can simplify the chart and make it easier to read and understand. We can also label the new categories with more intuitive and descriptive names that better reflect their meaning, which can further improve the chart's readability.
+
+# i) Review the following code and run it. It creates a table showing the total NA_sales, number of games, and sales per game ratiofor each Publisher. Comment on table1. What kind of data story each measure ( ie. total NA_sales, number of games, and sales per game ratio) is telling you? (For example, number of games shows games released by each publisher. Some publishers made small number of games as few as 1 while others as many as 1000.)
+
+```{r}
+library(dplyr)
+
+table1 <- d %>% group_by(Publisher) %>% 
+                summarize(
+                     numberofGames = n(),
+                     totalNASales = sum(NA_Sales),
+                     salesPerGame = totalNASales/numberofGames
+                ) %>% 
+                arrange(desc(totalNASales))
+View(table1)
+
+```
+# j) Run the following code to create a barplot using data from table1 whose totalNAsales are greater than 100. What could be an interesting observation from this chart? What would you title this chart reflecting this point?
+
+In summary, this code creates a bar chart of total North American sales by publisher, using only data from publishers with total sales greater than 100.
+
+```{r}
+library(ggplot2)
+
+table1 %>%
+filter(totalNASales > 100) %>%
+ggplot() +
+  geom_bar( aes(y=totalNASales, x=Publisher), stat="identity")
+
+
+```
+# k) The following code creates a table showing the total NA_sales, and  sales ratio for each Year of Release. What kind of data story each measure is telling you?
+ 
+ It gives out the sales numnber of each game in a year along with number of games released in that particular year
+
+```{r}
+table2 <- d %>% group_by(Year_of_Release) %>% 
+  summarize(
+    numberofGames = n(),
+    totalNASales = sum(NA_Sales),
+    salesPerGameinYear = totalNASales/numberofGames
+  ) %>% 
+  arrange(desc(Year_of_Release))
+View(table2)
+
+```
+
+# l) Run the following code to create a line chart. What could be the main point in this chart? How would you title this chart?
+
+It shows the Graph of the Sales data of a gate and it's peak in particular year
+
+```{r}
+table2 %>%
+  ggplot() +
+  geom_line( aes(y=totalNASales, x=Year_of_Release))
+
+```
+
+
+
+
+
+
+# m) Run the following code to create a line chart. What could be the main point in this chart? How would you title this chart?
+
+It shows how popular a games was in each year along with it's peak popularity.I would name it as Popularity Chart.
+
+```{r}
+table2 %>%
+  ggplot() +
+  geom_line( aes(y=salesPerGameinYear, x=Year_of_Release))
+
+
+ 
+```
+
+# 3. CONCLUSION.
+
+Therefore by using the Video games Data, We can Find a lot of useful insights like how good a game was sold and which game became popular in which year and how to predict future sales of a particular region using other regions as predictor. And which genre would be the best for a game to launched in which platform for higher sales
+
+
+
+
